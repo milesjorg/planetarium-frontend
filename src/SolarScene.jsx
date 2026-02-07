@@ -65,7 +65,7 @@ export default function SolarScene() {
     scene.add(ambient);
 
     // Sun
-    const sunMaterial = new THREE.MeshStandardMaterial({ 
+    const sunMaterial = new THREE.MeshStandardMaterial({
       map: textureLoader.load("/textures/sun.jpg"),
       emissive: new THREE.Color(0xffaa00),
       emissiveIntensity: 1.8
@@ -89,13 +89,16 @@ export default function SolarScene() {
     // scene.add(jupiter);
 
     // Earth
+    const earthGroup = new THREE.Group();
+
     const earth = createPlanet({
-      radius: 0.1,
-      color: 0x3366ff,
-      // textureURL: "/earth.jpg",
-      distance: 3
+      radius: 0.3,
+      textureURL: "/textures/earth.jpg",
+      distance: 5
     });
-    scene.add(earth);
+
+    earthGroup.add(earth);
+    scene.add(earthGroup);
 
     // Resize handling
     const handleResize = () => {
@@ -119,6 +122,7 @@ export default function SolarScene() {
       sun.rotation.y += 0.001;
       // jupiter.rotation.y += 0.01;
       earth.rotation.y += 0.01;
+      earthGroup.rotation.y += 0.002;
 
       // Orbit planets
       const time = Date.now() * 0.001;
