@@ -6,17 +6,28 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 export default function SolarScene() {
   const mountRef = useRef(null);
   const initialized = useRef(false);
+  const textureLoader = new THREE.TextureLoader();
 
   function createPlanet({
     radius,
     color,
+    textureURL,
     distance = 0,
     segments = 32
   }) {
     const geometry = new THREE.SphereGeometry(radius, segments, segments);
-    const material = new THREE.MeshBasicMaterial({ color });
+
+    let material
+    if (textureURL) {
+      const texture = textureLoader.load(textureURL);
+      material = new THREE.MeshStandardMaterial({ map: texture });
+    } else {
+      material = new THREE.MeshStandardMaterial({ color });
+    }
+
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.x = distance;
+
     return mesh;
   }
 
@@ -54,25 +65,34 @@ export default function SolarScene() {
     scene.add(ambient);
 
     // Sun
-    const sun = createPlanet({ radius: 1, color: 0xffcc00 });
+    const sunMaterial = new THREE.MeshStandardMaterial({ 
+      map: textureLoader.load("/textures/sun.jpg"),
+      emissive: new THREE.Color(0xffaa00),
+      emissiveIntensity: 1.8
+    });
+
+    const sunGeometry = new THREE.SphereGeometry(1, 64, 64);
+    const sun = new THREE.Mesh(sunGeometry, sunMaterial);
     scene.add(sun);
 
-    const sunLight = new THREE.PointLight(0xffffff, 3, 0);
+    const sunLight = new THREE.PointLight(0xffffff, 2.5, 100);
     sunLight.position.set(0, 0, 0);
-    scene.add(sunLight);
+    sun.add(sunLight);
 
-    // Mercury
-    const mercury = createPlanet({
-      radius: 0.038,
-      color: 0xaaaaaa,
-      distance: 2
-    });
-    scene.add(mercury);
+    // Jupiter
+    // const jupiter = createPlanet({
+    //   radius: 0.3,
+    //   color: 0xff6600,
+    //   textureURL: "/jupiter.jpg",
+    //   distance: 10
+    // });
+    // scene.add(jupiter);
 
     // Earth
     const earth = createPlanet({
       radius: 0.1,
       color: 0x3366ff,
+      // textureURL: "/earth.jpg",
       distance: 3
     });
     scene.add(earth);
@@ -97,13 +117,13 @@ export default function SolarScene() {
 
       // Rotate planets
       sun.rotation.y += 0.001;
-      mercury.rotation.y += 0.005;
+      // jupiter.rotation.y += 0.01;
       earth.rotation.y += 0.01;
 
       // Orbit planets
       const time = Date.now() * 0.001;
-      mercury.position.x = Math.cos(time * 4) * 2;
-      mercury.position.z = Math.sin(time * 4) * 2;
+      // jupiter.position.x = Math.cos(time * 1/2) * 7;
+      // jupiter.position.z = Math.sin(time * 1/2) * 7;
       earth.position.x = Math.cos(time * 2) * 3;
       earth.position.z = Math.sin(time * 2) * 3;
     };
