@@ -54,6 +54,9 @@ export default function SolarScene() {
       mountRef.current.clientWidth,
       mountRef.current.clientHeight
     );
+    renderer.colorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.9;
     mountRef.current.appendChild(renderer.domElement);
 
     // Controls
@@ -65,19 +68,34 @@ export default function SolarScene() {
     scene.add(ambient);
 
     // Sun
-    const sunMaterial = new THREE.MeshStandardMaterial({
-      map: textureLoader.load("/textures/sun.jpg"),
-      emissive: new THREE.Color(0xffaa00),
-      emissiveIntensity: 1.8
+    const sunTexture = textureLoader.load("/textures/sun.jpg");
+    sunTexture.colorSpace = THREE.SRGBColorSpace;
+    const sunSurfaceMaterial = new THREE.MeshStandardMaterial({
+      map: sunTexture,
+      color: 0xffffff,
+      emissive: 0xffaa00,
+      emissiveIntensity: 0.25
     });
 
     const sunGeometry = new THREE.SphereGeometry(1, 64, 64);
-    const sun = new THREE.Mesh(sunGeometry, sunMaterial);
-    scene.add(sun);
+    const sunSurface = new THREE.Mesh(sunGeometry, sunSurfaceMaterial);
+    scene.add(sunSurface);
 
-    const sunLight = new THREE.PointLight(0xffffff, 2.5, 100);
+    const sunLight = new THREE.PointLight(0xffffff, 4, 200);
     sunLight.position.set(0, 0, 0);
-    sun.add(sunLight);
+    sunSurface.add(sunLight);
+
+    // const sunGlowMaterial = new THREE.MeshBasicMaterial({
+    //   color: 0xffaa00,
+    //   transparent: true,
+    //   opacity: 0.4,
+    //   blending: THREE.AdditiveBlending,
+    //   depthWrite: false
+    // });
+
+    // const sunGlowGeometry = new THREE.SphereGeometry(1.01, 32, 32);
+    // const sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
+    // scene.add(sunGlow);
 
     // Jupiter
     // const jupiter = createPlanet({
@@ -96,6 +114,18 @@ export default function SolarScene() {
       textureURL: "/textures/earth.jpg",
       distance: 5
     });
+
+    const moonOrbitGroup = new THREE.Group();
+    moonOrbitGroup.position.copy(earth.position);
+    earthGroup.add(moonOrbitGroup);
+
+    // Moon Mesh
+    const moon = createPlanet({
+      radius: 0.1,
+      textureURL: "/textures/moon.jpg",
+      distance: 0.6
+    });
+    moonOrbitGroup.add(moon);
 
     earthGroup.add(earth);
     scene.add(earthGroup);
@@ -119,17 +149,14 @@ export default function SolarScene() {
       renderer.render(scene, camera);
 
       // Rotate planets
-      sun.rotation.y += 0.001;
-      // jupiter.rotation.y += 0.01;
+      sunSurface.rotation.y += 0.001;
+      moonOrbitGroup.rotation.y += 0.02;
       earth.rotation.y += 0.01;
       earthGroup.rotation.y += 0.002;
 
       // Orbit planets
       const time = Date.now() * 0.001;
-      // jupiter.position.x = Math.cos(time * 1/2) * 7;
-      // jupiter.position.z = Math.sin(time * 1/2) * 7;
-      earth.position.x = Math.cos(time * 2) * 3;
-      earth.position.z = Math.sin(time * 2) * 3;
+      earthGroup.rotation.y += 0.002;
     };
 
     animate();
