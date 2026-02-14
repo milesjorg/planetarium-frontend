@@ -8,29 +8,6 @@ export default function SolarScene() {
   const initialized = useRef(false);
   const textureLoader = new THREE.TextureLoader();
 
-  function createPlanet({
-    radius,
-    color,
-    textureURL,
-    distance = 0,
-    segments = 32
-  }) {
-    const geometry = new THREE.SphereGeometry(radius, segments, segments);
-
-    let material
-    if (textureURL) {
-      const texture = textureLoader.load(textureURL);
-      material = new THREE.MeshStandardMaterial({ map: texture });
-    } else {
-      material = new THREE.MeshStandardMaterial({ color });
-    }
-
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.x = distance;
-
-    return mesh;
-  }
-
   function createPlanetSystem({
     radius,
     textureURL,
@@ -83,16 +60,12 @@ export default function SolarScene() {
     );
     renderer.colorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.9;
+    renderer.toneMappingExposure = 8;
     mountRef.current.appendChild(renderer.domElement);
 
     // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-
-    // Ambient Lights
-    const ambient = new THREE.AmbientLight(0x404040, 0.5);
-    scene.add(ambient);
 
     // Sun
     const sunTexture = textureLoader.load("/textures/sun.jpg");
@@ -101,28 +74,16 @@ export default function SolarScene() {
       map: sunTexture,
       color: 0xffffff,
       emissive: 0xffaa00,
-      emissiveIntensity: 0.25
+      emissiveIntensity: 0.15
     });
 
     const sunGeometry = new THREE.SphereGeometry(1, 64, 64);
     const sunSurface = new THREE.Mesh(sunGeometry, sunSurfaceMaterial);
     scene.add(sunSurface);
 
-    const sunLight = new THREE.PointLight(0xffffff, 4, 200);
+    const sunLight = new THREE.PointLight(0xffffff, 8, 200);
     sunLight.position.set(0, 0, 0);
     sunSurface.add(sunLight);
-
-    // const sunGlowMaterial = new THREE.MeshBasicMaterial({
-    //   color: 0xffaa00,
-    //   transparent: true,
-    //   opacity: 0.4,
-    //   blending: THREE.AdditiveBlending,
-    //   depthWrite: false
-    // });
-
-    // const sunGlowGeometry = new THREE.SphereGeometry(1.01, 32, 32);
-    // const sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
-    // scene.add(sunGlow);
 
     // Jupiter
     // const jupiter = createPlanet({
@@ -143,7 +104,7 @@ export default function SolarScene() {
 
     const moonSystem = createPlanetSystem({
       radius: 0.05,
-      color: 0x888888,
+      textureURL: "/textures/moon.jpg",
       distance: 0.6,
     });
     moonSystem.orbitGroup.position.copy(earthSystem.planet.position);
