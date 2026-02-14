@@ -31,6 +31,33 @@ export default function SolarScene() {
     return mesh;
   }
 
+  function createPlanetSystem({
+    radius,
+    textureURL,
+    color,
+    distance,
+    segments = 32
+  }) {
+    const orbitGroup = new THREE.Group();
+
+    const geometry = new THREE.SphereGeometry(radius, segments, segments);
+
+    let material;
+    if (textureURL) {
+      const texture = textureLoader.load(textureURL);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      material = new THREE.MeshStandardMaterial({ map: texture });
+    } else {
+      material = new THREE.MeshStandardMaterial({ color });
+    }
+
+    const planet = new THREE.Mesh(geometry, material);
+    planet.position.x = distance;
+    orbitGroup.add(planet);
+
+    return { orbitGroup, planet };
+  }
+
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
@@ -107,28 +134,20 @@ export default function SolarScene() {
     // scene.add(jupiter);
 
     // Earth
-    const earthGroup = new THREE.Group();
-
-    const earth = createPlanet({
+    const earthSystem = createPlanetSystem({
       radius: 0.3,
       textureURL: "/textures/earth.jpg",
       distance: 5
     });
+    scene.add(earthSystem.orbitGroup);
 
-    const moonOrbitGroup = new THREE.Group();
-    moonOrbitGroup.position.copy(earth.position);
-    earthGroup.add(moonOrbitGroup);
-
-    // Moon Mesh
-    const moon = createPlanet({
-      radius: 0.1,
-      textureURL: "/textures/moon.jpg",
-      distance: 0.6
+    const moonSystem = createPlanetSystem({
+      radius: 0.05,
+      color: 0x888888,
+      distance: 0.6,
     });
-    moonOrbitGroup.add(moon);
-
-    earthGroup.add(earth);
-    scene.add(earthGroup);
+    moonSystem.orbitGroup.position.copy(earthSystem.planet.position);
+    earthSystem.orbitGroup.add(moonSystem.orbitGroup);
 
     // Resize handling
     const handleResize = () => {
@@ -150,13 +169,10 @@ export default function SolarScene() {
 
       // Rotate planets
       sunSurface.rotation.y += 0.001;
-      moonOrbitGroup.rotation.y += 0.02;
-      earth.rotation.y += 0.01;
-      earthGroup.rotation.y += 0.002;
 
-      // Orbit planets
-      const time = Date.now() * 0.001;
-      earthGroup.rotation.y += 0.002;
+      earthSystem.planet.rotation.y += 0.01;
+      earthSystem.orbitGroup.rotation.y += 0.002;
+      moonSystem.orbitGroup.rotation.y += 0.02;
     };
 
     animate();
