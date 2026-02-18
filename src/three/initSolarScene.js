@@ -15,7 +15,7 @@ export function initSolarScene(container) {
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.colorSpace = THREE.SRGBColorSpace;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 8;
     container.appendChild(renderer.domElement);
@@ -31,15 +31,21 @@ export function initSolarScene(container) {
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
 
-    return { 
+    return {
         scene,
         camera,
         renderer,
         controls,
         cleanup: () => {
+            console.log("Cleaning up");
             observer.disconnect();
+            controls.dispose();
             renderer.dispose();
+
+            if (renderer.domElement && renderer.domElement.parentNode) {
+                renderer.domElement.parentNode.removeChild(renderer.domElement);
+            }
         }
-     };
+    };
 
 }
