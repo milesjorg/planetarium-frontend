@@ -1,0 +1,75 @@
+/**
+ * Centralized time management for the solar system simulation
+ * This module maintains the simulation time and provides methods to
+ * query and control the passage of time
+ */
+
+export class SimulationTime {
+    constructor() {
+        this.currentTime = 0;       // Current simulation time in seconds
+        this.timeScale = 1;         // Multiplier for simulation speed (1 = real-time)
+        this.isPaused = false;      // Whether simulation is paused
+    }
+
+    /**
+     * Update the simulation time based on elapsed real time
+     * @param {number} deltaTime - Real elapsed time in seconds
+     */
+    update(deltaTime) {
+        if (this.isPaused) return;
+        this.currentTime += deltaTime * this.timeScale;
+    }
+
+    /**
+     * Get the current simulation time
+     * @returns {number} Current simulation time in seconds
+     */
+    getCurrentTime() {
+        return this.currentTime;
+    }
+
+    /**
+     * Set the time scale multiplier
+     * @param {number} scale - New time scale (e.g., 2 = twice as fast, 0.5 = half speed)
+     */
+    setTimeScale(scale) {
+        this.timeScale = scale;
+    }
+
+    /**
+     * Get the current time scale
+     * @returns {number} Current time scale
+     */
+    getTimeScale() {
+        return this.timeScale;
+    }
+
+    /**
+     * Pause the simulation
+     */
+    pause() {
+        this.isPaused = true;
+    }
+
+    /**
+     * Resume the simulation
+     */
+    resume() {
+        this.isPaused = false;
+    }
+
+    /**
+     * Check if simulation is paused
+     * @returns {boolean} True if paused
+     */
+    getIsPaused() {
+        return this.isPaused;
+    }
+
+    /**
+     * Reset simulation time to zero
+     */
+    reset() {
+        this.currentTime = 0;
+    }
+}
