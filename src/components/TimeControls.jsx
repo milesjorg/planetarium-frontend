@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { simTime } from '../three/SimulationTime';
 import './TimeControls.css';
 
 export default function TimeControls() {
     const [isPaused, setIsPaused] = useState(false);
     const [speed, setSpeed] = useState(1);
+
+    const speedPresets = [1, 2, 4, 10, 50, 100, 500, 1000];
 
     // Handle pause/play toggle
     const handlePlayPause = () => {
@@ -17,38 +19,33 @@ export default function TimeControls() {
         }
     };
 
-    // Handle speed slider change
-    const handleSpeedChange = (e) => {
-        const newSpeed = parseFloat(e.target.value);
-        console.log("Setting time scale to", newSpeed);
-        setSpeed(newSpeed);
-        simTime.setTimeScale(newSpeed);
+    // Handle preset speed button click
+    const handleSpeedPreset = (presetSpeed) => {
+        setSpeed(presetSpeed);
+        simTime.setTimeScale(presetSpeed);
     };
 
     return (
         <div className="time-controls">
             <button 
-                className="control-button play-pause-button"
+                className={`play-pause-button ${isPaused ? 'paused' : ''}`}
                 onClick={handlePlayPause}
                 title={isPaused ? "Resume simulation" : "Pause simulation"}
             >
                 {isPaused ? '▶' : '⏸'}
             </button>
 
-            <div className="speed-control">
-                <label htmlFor="speed-slider">Speed:</label>
-                <input
-                    id="speed-slider"
-                    type="range"
-                    min="0.1"
-                    max="100"
-                    step="0.1"
-                    value={speed}
-                    onChange={handleSpeedChange}
-                    className="slider"
-                    title={`Speed: ${speed.toFixed(1)}x`}
-                />
-                <span className="speed-value">{speed.toFixed(1)}x</span>
+            <div className="speed-presets">
+                {speedPresets.map((preset) => (
+                    <button
+                        key={preset}
+                        className={`speed-button ${speed === preset ? 'active' : ''}`}
+                        onClick={() => handleSpeedPreset(preset)}
+                        // title={`Set simulation to ${preset}x speed`}
+                    >
+                        {preset}x
+                    </button>
+                ))}
             </div>
         </div>
     );
