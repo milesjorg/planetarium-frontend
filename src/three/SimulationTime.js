@@ -4,7 +4,7 @@
  * query and control the passage of time
  */
 
-export class SimulationTime {
+class SimulationTime {
     constructor() {
         this.currentTime = 0;       // Current simulation time in seconds
         this.timeScale = 1;         // Multiplier for simulation speed (1 = real-time)
@@ -73,3 +73,15 @@ export class SimulationTime {
         this.currentTime = 0;
     }
 }
+
+/**
+ * Singleton instance of SimulationTime
+ * All parts of the application (animation loop, React components, etc.)
+ * use this same instance to ensure a single source of truth for time
+ */
+export const simTime = new SimulationTime();
+
+/**
+ * Export the class for testing or creating additional instances if needed
+ */
+export { SimulationTime };
