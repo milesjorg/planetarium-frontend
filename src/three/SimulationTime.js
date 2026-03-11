@@ -72,6 +72,14 @@ class SimulationTime {
     reset() {
         this.currentTime = 0;
     }
+
+    getJulianDate() {
+        // Convert current simulation time (in seconds) to Julian Date
+        // Assuming simulation starts at J2000.0 (January 1, 2000, 12:00 TT)
+        const J2000 = 2451545.0; // Julian Date for J2000.0
+        const secondsPerDay = 86400;
+        return J2000 + this.currentTime / secondsPerDay;
+    }
 }
 
 /**
