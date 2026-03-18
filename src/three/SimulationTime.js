@@ -9,6 +9,35 @@ class SimulationTime {
         this.currentTime = 0;       // Current simulation time in seconds
         this.timeScale = 1;         // Multiplier for simulation speed (1 = real-time)
         this.isPaused = false;      // Whether simulation is paused
+
+        // Initialize to today's date converted to Julian Date
+        this.startJulianDate = this._getTodayAsJulianDate();
+    }
+
+    /**
+     * Get today's date as a Julian Date
+     * @private
+     * @returns {number} Julian Date for today
+     */
+    _getTodayAsJulianDate() {
+        const now = new Date();
+        const year = now.getUTCFullYear();
+        const month = now.getUTCMonth() + 1;
+        const day = now.getUTCDate();
+        const hours = now.getUTCHours();
+        const minutes = now.getUTCMinutes();
+        const seconds = now.getUTCSeconds();
+
+        // Gregorian to Julian Date algorithm
+        const a = Math.floor((14 - month) / 12);
+        const y = year + 4800 - a;
+        const m = month + 12 * a - 3;
+
+        const jdn = day + Math.floor((153 * m + 2) / 5) + 365 * y +
+            Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+
+        const fraction = (hours + minutes / 60 + seconds / 3600) / 24;
+        return jdn + fraction - 0.5;
     }
 
     /**
@@ -75,10 +104,9 @@ class SimulationTime {
 
     getJulianDate() {
         // Convert current simulation time (in seconds) to Julian Date
-        // Assuming simulation starts at J2000.0 (January 1, 2000, 12:00 TT)
-        const J2000 = 2451545.0; // Julian Date for J2000.0
+        // Starts from the configured start date (defaults to today)
         const secondsPerDay = 86400;
-        return J2000 + this.currentTime / secondsPerDay;
+        return this.startJulianDate + this.currentTime / secondsPerDay;
     }
 }
 
