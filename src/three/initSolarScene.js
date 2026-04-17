@@ -5,13 +5,17 @@ export function initSolarScene(container) {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
 
+    // Add ambient light to make planets easier to see
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+    scene.add(ambientLight);
+
     const camera = new THREE.PerspectiveCamera(
         60,
         container.clientWidth / container.clientHeight,
         0.1,
         1000
     );
-    camera.position.set(0, 10, 25);
+    camera.position.set(0, 20, 100);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);

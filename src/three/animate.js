@@ -1,12 +1,13 @@
 import * as THREE from 'three';
 import { simTime } from './SimulationTime';
+import { orbitCalculator } from './OrbitCalculator';
 
 export function startAnimation({
     renderer,
     scene,
     camera,
     controls,
-    systems
+    systems: celestialBodies
 }) {
     let frameId = null;
     let running = true;
@@ -19,16 +20,29 @@ export function startAnimation({
         frameId = requestAnimationFrame(animate);
 
         const delta = clock.getDelta();
-        simTime.update(delta); // Delegate time updating to centralized time manager
+        simTime.update(delta);
 
         // Calculate the simulated delta (real time multiplied by time scale)
         const simulatedDelta = delta * simTime.getTimeScale();
 
-        // Only update planet positions/rotations if simulation is not paused
+        // Always fetch and update planet positions based on current JD
+        const julianDate = simTime.getJulianDate();
+        orbitCalculator.getPlanetPositions(julianDate).then(positions => {
+            if (positions) {
+                celestialBodies.forEach(system => {
+                    const planetPos = positions[system.planetName];
+                    if (planetPos) {
+                        system.orbitGroup.position.set(planetPos.x, planetPos.y, planetPos.z);
+                    }
+                });
+            }
+        });
+
+        // Only update planet rotations if simulation is not paused
         if (!simTime.getIsPaused()) {
-            systems.forEach(system => {
+            celestialBodies.forEach(system => {
+                // Always update axial rotation (independent of position updates)
                 system.planet.rotation.y += system.rotationSpeed * simulatedDelta;
-                system.orbitGroup.rotation.y += system.orbitSpeed * simulatedDelta;
             });
         }
 
